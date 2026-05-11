@@ -1,0 +1,86 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Yury Azin — Data Science · ML · NLP",
+    "section": "",
+    "text": "Code\n\n\n\n\n\n\n \n\n\n\nFar better an approximate answer to the right question, which is often vague, than an exact answer to the wrong question, which can always be made precise.\n— John Tukey\n\nHi! I’m a DS Team Lead with broad, varied experience. I’ve come the full path from classical machine-learning algorithms to modern NLP solutions. I’m energized by hard problems, constant learning, and a strong team around me. More about me here. If I’m lucky enough to find the time, I write to the blog — with code or without, sometimes with typos. Sory!"
+  },
+  {
+    "objectID": "posts/2026-05-10-gradient-descent/index.html",
+    "href": "posts/2026-05-10-gradient-descent/index.html",
+    "title": "Gradient Descent: a Tour with Interactive Plots",
+    "section": "",
+    "text": "Gradient descent is arguably one of the most fundamental bricks of modern ML — linear regression, deep nets, and trillion-parameter LLMs all stand on top of it. In this post I won’t dig into the math behind the algorithm (I assume you’ve got that already) — just a quick reminder of the intuition before we jump to the most fun part: a 3D loss surface with local minima, where you can see exactly why plain GD struggles on non-convex problems.\nThe intuition: picture a hiker caught by a thunderstorm in the mountains. Pitch dark, pouring rain, thunder rolling — they need cover fast, and the only sensible strategy is to head somewhere lower where there’s at least some shelter from the wind. No map, the flashlight is soaked and dead — but they can feel the slope of the ground underfoot. They take a step in the downhill direction (step length = \\(\\alpha\\), the learning rate), feel the slope again, step again. They keep going until everything around feels “uphill” — they’ve reached a basin. If it’s the only basin on the ridge — that’s the global minimum, hooray. If there are several (and in real terrain there usually are, as in the examples below) — they’ll end up in the closest one. Whether that’s good or bad depends on the circumstances."
+  },
+  {
+    "objectID": "posts/2026-05-10-gradient-descent/index.html#non-convex-landscape-a-3d-demo",
+    "href": "posts/2026-05-10-gradient-descent/index.html#non-convex-landscape-a-3d-demo",
+    "title": "Gradient Descent: a Tour with Interactive Plots",
+    "section": "Non-convex landscape: a 3D demo",
+    "text": "Non-convex landscape: a 3D demo\nLinear regression’s MSE is convex with a single global minimum. Real landscapes are messier — for instance,\n\\[\nF(x, y) = \\sin(\\tfrac{1}{2}x^2 - \\tfrac{1}{4}y^2 - 1)\n       \\cdot \\cos(2x + 1 - e^y) \\cdot x\n\\]\nhas a handful of local minima and saddle points. Real-world ML landscapes are typically much worse, with local minima, saddle points and flat plateaus where plain GD struggles. To get a feel for it, below is a set of classic optimization benchmarks. Pick a function from the dropdown, choose a starting point / step size / number of iterations, and hit Start. The surface is interactive (drag to rotate, scroll to zoom); the slider and ▶ button replay the descent step-by-step.\n\nWhat’s in the menu\nSin-cos product — our starting example: \\[F(x,y) = \\sin\\!\\bigl(\\tfrac{1}{2}x^2 - \\tfrac{1}{4}y^2 - 1\\bigr)\n       \\cdot \\cos(2x + 1 - e^y) \\cdot x\\] A handful of local minima and saddle points on \\([-4, 4]^2\\).\nHimmelblau: \\[F(x,y) = (x^2 + y - 11)^2 + (x + y^2 - 7)^2\\] Four identical global minima at the corners. Which well GD falls into is entirely determined by the starting point.\nRastrigin — the classic “egg-crate”: \\[F(x,y) = 20 + x^2 + y^2 - 10\\bigl[\\cos(2\\pi x) + \\cos(2\\pi y)\\bigr]\\] Dozens of local minima on a grid; global minimum at the origin. Without momentum/adaptive methods, GD settles into the first hole it sees.\nAckley: \\[F(x,y) = -20\\, e^{-0.2\\sqrt{(x^2+y^2)/2}}\n         - e^{[\\cos(2\\pi x) + \\cos(2\\pi y)]/2} + e + 20\\] Global minimum at the origin, surrounded by ripples of small wells. A favorite test for adaptive optimizers.\nSix-hump camel: \\[F(x,y) = \\bigl(4 - 2.1x^2 + \\tfrac{x^4}{3}\\bigr)x^2 + xy + (-4 + 4y^2)y^2\\] Six local, two global minima. Purely polynomial — the basin transitions are very visible.\nBeale: \\[F(x,y) = (1.5 - x + xy)^2 + (2.25 - x + xy^2)^2 + (2.625 - x + xy^3)^2\\] A “banana valley” — long narrow canyon along which plain GD crawls in zig-zags. Classic scenario where momentum/Adam fly far faster.\nSchaffer N2: \\[F(x,y) = 0.5 + \\frac{\\sin^2(x^2 - y^2) - 0.5}{[1 + 0.001(x^2 + y^2)]^2}\\] Global min at \\((0,0)\\). Concentric high-frequency oscillations near the origin — GD easily lands in one of the ring-shaped local minima.\nEggholder: \\[F(x,y) = -(y+47)\\sin\\!\\sqrt{|y+x/2+47|} - x\\sin\\!\\sqrt{|x-(y+47)|}\\] A chaotic landscape with many local minima; the global one sits on the boundary at \\((512, 404.23)\\). One of the toughest benchmarks out there.\nLevi N13: \\[F(x,y) = \\sin^2(3\\pi x) + (x-1)^2[1 + \\sin^2(3\\pi y)] + (y-1)^2[1 + \\sin^2(2\\pi y)]\\] Global min at \\((1, 1)\\). Regular grid of local minima under an overall parabolic envelope.\nBukin N6: \\[F(x,y) = 100\\sqrt{|y - 0.01x^2|} + 0.01\\,|x + 10|\\] Global min at \\((-10, 1)\\). A very narrow ridge along the parabola \\(y = 0.01x^2\\) — classic test for valley-following descent.\nRosenbrock — the “banana function”: \\[F(x,y) = (1-x)^2 + 100(y - x^2)^2\\] Global min at \\((1, 1)\\). Parabolic valley whose floor is \\(y = x^2\\) — the most famous optimizer benchmark from the 1960s.\nBooth: \\[F(x,y) = (x + 2y - 7)^2 + (2x + y - 5)^2\\] Global min at \\((1, 3)\\). A plain convex quadratic — useful sanity check: GD should find it within a handful of steps.\n\nThe surface below is interactive — drag to rotate, scroll to zoom. Markers: 🟢 start, 🔶 finish of the trajectory.\n\n\n\nShow code (Python: default surface)\nimport numpy as np\nimport plotly.graph_objects as go\nimport plotly.io as pio\nfrom IPython.display import HTML, display\n\npio.templates.default = \"plotly_white\"\n\n\ndef F_sincos(x, y):\n    return np.sin(0.5 * x**2 - 0.25 * y**2 - 1) * np.cos(2 * x + 1 - np.exp(y)) * x\n\ndef grad_sincos(x, y):\n    \"\"\"Analytical gradient of Sin-cos product (for the initial trajectory).\"\"\"\n    u = 0.5 * x**2 - 0.25 * y**2 - 1\n    v = 2 * x + 1 - np.exp(y)\n    su, cu = np.sin(u), np.cos(u)\n    sv, cv = np.sin(v), np.cos(v)\n    return (\n        x**2 * cu * cv - 2 * x * su * sv + su * cv,\n        -0.5 * x * y * cu * cv + x * np.exp(y) * su * sv,\n    )\n\n\ndef make_trajectory(F, grad_F, x0, y0, alpha=0.1, n_steps=120):\n    xs, ys, zs = [x0], [y0], [F(x0, y0) + 0.1]\n    for _ in range(n_steps):\n        gx, gy = grad_F(xs[-1], ys[-1])\n        xs.append(xs[-1] - alpha * gx)\n        ys.append(ys[-1] - alpha * gy)\n        zs.append(F(xs[-1], ys[-1]) + 0.1)\n    return xs, ys, zs\n\n\nCOLORSCALE = [\n    [0.00, \"#000003\"],   # near-black\n    [0.12, \"#1a0030\"],   # very dark purple\n    [0.25, \"#3e0e7a\"],   # purple\n    [0.38, \"#3b3a98\"],   # indigo\n    [0.52, \"#2563eb\"],   # blue\n    [0.65, \"#0ea5e9\"],   # cyan-blue\n    [0.76, \"#22c55e\"],   # green\n    [0.85, \"#facc15\"],   # yellow\n    [0.93, \"#f97316\"],   # orange\n    [1.00, \"#dc2626\"],   # red\n]\n\nx_grid = np.linspace(-4, 4, 120)\ny_grid = np.linspace(-4, 4, 120)\nXg, Yg = np.meshgrid(x_grid, y_grid)\nZg = F_sincos(Xg, Yg)\n\nxs, ys, zs = make_trajectory(F_sincos, grad_sincos, x0=2.54, y0=-1.25,\n                             alpha=0.1, n_steps=120)\n\nfig = go.Figure([\n    # 0 — surface\n    go.Surface(x=Xg, y=Yg, z=Zg, colorscale=COLORSCALE, opacity=0.92,\n               showscale=False, name=\"F(x, y)\"),\n    # 1 — trajectory line (hidden from legend)\n    go.Scatter3d(x=xs, y=ys, z=zs, mode=\"lines+markers\",\n                 line=dict(color=\"#ef4444\", width=4),\n                 marker=dict(size=3, color=\"#ef4444\"),\n                 name=\"Trajectory\", showlegend=False),\n    # 2 — start (green circle)\n    go.Scatter3d(x=[xs[0]], y=[ys[0]], z=[zs[0]], mode=\"markers\",\n                 marker=dict(size=8, color=\"#22c55e\", symbol=\"circle\",\n                             line=dict(width=2, color=\"white\")),\n                 name=\"Start\"),\n    # 3 — finish (gold diamond)\n    go.Scatter3d(x=[xs[-1]], y=[ys[-1]], z=[zs[-1]], mode=\"markers\",\n                 marker=dict(size=10, color=\"#fbbf24\", symbol=\"diamond\",\n                             line=dict(width=2, color=\"white\")),\n                 name=\"Finish\"),\n])\nfig.update_layout(\n    title=\"F(x, y) surface and a gradient-descent trajectory\",\n    height=620, margin=dict(l=0, r=0, t=60, b=0),\n    scene=dict(xaxis_title=\"x\", yaxis_title=\"y\", zaxis_title=\"F\",\n               camera=dict(eye=dict(x=1.6, y=1.6, z=0.9))),\n)\n\n\n\n\n\n\n  Function:\n    \n      Sin-cos product (original)\n      Himmelblau\n      Rastrigin (egg-crate)\n      Ackley\n      Six-hump camel\n      Beale (banana valley)\n      Schaffer N2\n      Eggholder\n      Levi N13\n      Bukin N6\n      Rosenbrock (banana function)\n      Booth\n    \n  \n\n\n\n  x₀ \n  y₀ \n  α \n  steps \n  ▶ Start\n\n\n\n  ▶\n  \n  step: 120 / 120\n\n\n\nThe algorithm got stuck in a local minimum — a typical picture in non-convex problems (think neural networks), along with plenty of other unpleasant scenarios: extremely slow convergence, bouncing “wall to wall”, and so on — you likely saw some of them firsthand if you played with the functions above. To fight these headaches people came up with stochasticity, momentum, restarts, and a long list of heuristics that keep modern deep learning afloat."
+  },
+  {
+    "objectID": "posts/2026-05-10-gradient-descent/index.html#where-to-go-from-here",
+    "href": "posts/2026-05-10-gradient-descent/index.html#where-to-go-from-here",
+    "title": "Gradient Descent: a Tour with Interactive Plots",
+    "section": "Where to go from here",
+    "text": "Where to go from here\nNatural next stops:\n\nAdam, AdaGrad, RMSProp — adaptive per-coordinate step sizes.\nMomentum / Nesterov — adding “inertia” to the update rule.\nLR schedules in the wild: cosine, warmup, restarts.\nGradient clipping and why it saves transformer training.\nSaddle points in high-dimensional non-convex problems."
+  },
+  {
+    "objectID": "blog.html",
+    "href": "blog.html",
+    "title": "Blog",
+    "section": "",
+    "text": "Gradient Descent: a Tour with Interactive Plots\n\n\n\nML\n\noptimization\n\npython\n\n\n\nHacked together this interactive playground that visualizes how the simplest form of gradient descent works.\n\n\n\n\n\nDec 22, 2025\n\n24 min\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "Aug 2023 — Nov 2025 · R&D\n\nCut infrastructure and maintenance costs by 40 % by replacing a fleet of separate models with a single fine-tuned LLM-based solution.\nReduced Time-to-Market by 20 %.\nManaged and grew a team of 8.\nBuilt ML solutions for a large product focused on comprehensive social-media analysis.\nImplemented a RAG pipeline over 100M documents inside that product.\nRefactored and optimized the legacy codebase.\nEstablished cross-functional communication with business stakeholders.\n\n\n\n\nSep 2021 — Apr 2023\n\nNLP solutions powering contextual ad targeting.\nML model selecting relevant advertising articles.\nFeature engineering for other ML models.\nData collection and dataset generation (Scrapy, Google API).\nAssessor service for data-quality improvement (Streamlit).\n130+ category classifier (BERT Multilingual, SparkNLP, Clickhouse, Airflow).\n\n\n\n\nSep 2023 — Apr 2024\n\nSeminars on “Mathematical Methods in Data Analysis” for 3rd-year students.\nStudent rating — 4.86 / 5.\n\n\n\n\nAug 2019 — Sep 2020\n\nText-based cost model for large construction projects.\nGraph-based model for redesign cycle optimization.\n\n\n\n\nNov 2018 — Jul 2019 · Treasury\n\nOption pricing model.\nDynamic balance model.\nOptimal FX-transaction rate model.\n\n\n\n\nJan 2018 — Nov 2018 · CRM\n\nAnti-fraud models.\nCustomer-base clustering.\nText-message clustering.\nNext-Best-Offer recommendation system.\n\n\n\n\nMay 2012 — Aug 2013 · Analytics Department\n\n\n\nJan 2008 — Jan 2022\n\n~100 positive reviews · Profi.ru profile"
+  },
+  {
+    "objectID": "about.html#experience",
+    "href": "about.html#experience",
+    "title": "About",
+    "section": "",
+    "text": "Aug 2023 — Nov 2025 · R&D\n\nCut infrastructure and maintenance costs by 40 % by replacing a fleet of separate models with a single fine-tuned LLM-based solution.\nReduced Time-to-Market by 20 %.\nManaged and grew a team of 8.\nBuilt ML solutions for a large product focused on comprehensive social-media analysis.\nImplemented a RAG pipeline over 100M documents inside that product.\nRefactored and optimized the legacy codebase.\nEstablished cross-functional communication with business stakeholders.\n\n\n\n\nSep 2021 — Apr 2023\n\nNLP solutions powering contextual ad targeting.\nML model selecting relevant advertising articles.\nFeature engineering for other ML models.\nData collection and dataset generation (Scrapy, Google API).\nAssessor service for data-quality improvement (Streamlit).\n130+ category classifier (BERT Multilingual, SparkNLP, Clickhouse, Airflow).\n\n\n\n\nSep 2023 — Apr 2024\n\nSeminars on “Mathematical Methods in Data Analysis” for 3rd-year students.\nStudent rating — 4.86 / 5.\n\n\n\n\nAug 2019 — Sep 2020\n\nText-based cost model for large construction projects.\nGraph-based model for redesign cycle optimization.\n\n\n\n\nNov 2018 — Jul 2019 · Treasury\n\nOption pricing model.\nDynamic balance model.\nOptimal FX-transaction rate model.\n\n\n\n\nJan 2018 — Nov 2018 · CRM\n\nAnti-fraud models.\nCustomer-base clustering.\nText-message clustering.\nNext-Best-Offer recommendation system.\n\n\n\n\nMay 2012 — Aug 2013 · Analytics Department\n\n\n\nJan 2008 — Jan 2022\n\n~100 positive reviews · Profi.ru profile"
+  },
+  {
+    "objectID": "about.html#education",
+    "href": "about.html#education",
+    "title": "About",
+    "section": "Education",
+    "text": "Education\n\nYandex School of Data Analysis — Big Data · 2017 – 2018 · GPA 4.5 / 5 (didn’t finish — but wasn’t expelled either)\nMoscow State University, Faculty of Mechanics and Mathematics — PhD program · 2014 – 2016\nMoscow State University, Faculty of Mechanics and Mathematics — Specialist, Gas and liquid dynamics · 2007 – 2012 · GPA 4.75 / 5\nKolmogorov School at MSU (SESC MSU) — graduated 2007"
+  },
+  {
+    "objectID": "about.html#skills",
+    "href": "about.html#skills",
+    "title": "About",
+    "section": "Skills",
+    "text": "Skills\n\nProgramming languages: Python, SQL\nPython stack: pandas, NumPy, SciPy, matplotlib, plotly, scikit-learn, NLTK, fbprophet, Keras, transformers, sentence-transformers, LangGraph, Unsloth, Ollama\nMLOps / infrastructure: MLflow, Airflow, Docker, Git\nOther: Streamlit, Neo4j"
+  },
+  {
+    "objectID": "about.html#languages",
+    "href": "about.html#languages",
+    "title": "About",
+    "section": "Languages",
+    "text": "Languages\n\nRussian — native\nEnglish — B2"
+  },
+  {
+    "objectID": "about.html#hobbies",
+    "href": "about.html#hobbies",
+    "title": "About",
+    "section": "Hobbies",
+    "text": "Hobbies\n\nHockey — playing for HC Ice Pro\nGuitar"
+  },
+  {
+    "objectID": "about.html#contacts",
+    "href": "about.html#contacts",
+    "title": "About",
+    "section": "Contacts",
+    "text": "Contacts\n\nEmail: y.azin@mail.ru\nTelegram: @Zzzabardast\nCity: Moscow"
+  }
+]
