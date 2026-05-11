@@ -5,8 +5,8 @@ project:
 website:
   title: "Yury Azin"
   description: "Personal site — Data Science and Machine Learning"
-  site-url: https://AzinYury.github.io/Zzzabardast.github.io/en
-  repo-url: https://github.com/AzinYury/Zzzabardast.github.io
+  site-url: https://AzinY.github.io/en
+  repo-url: https://github.com/AzinY/AzinY.github.io
 
   navbar:
     background: light
