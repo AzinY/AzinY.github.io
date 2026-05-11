@@ -1,0 +1,13 @@
+---
+title: "Блог"
+subtitle: "Короткие заметки и наблюдения"
+listing:
+  contents: posts
+  type: default
+  sort: "date desc"
+  categories: true
+  feed: true
+  fields: [date, title, description, categories, reading-time]
+page-layout: full
+title-block-banner: true
+---

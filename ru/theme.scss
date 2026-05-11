@@ -1,0 +1,621 @@
+/*-- scss:defaults --*/
+
+// ============ ПАЛИТРА ============
+// Акцент: teal-600 / teal-700 (вместо синего)
+// Нейтральные: slate (для текста и заголовков)
+
+$accent:        #0d9488;     // teal-600 — акцент / hover
+$accent-dark:   #0f766e;     // teal-700 — глубже на hover
+$accent-soft:   rgba(13, 148, 136, 0.08);
+$accent-border: rgba(13, 148, 136, 0.3);
+
+$body-bg:    #ffffff;
+$body-color: #475569;        // slate-600
+
+$primary:           $accent;
+$link-color:        $accent;
+$link-hover-color:  $accent-dark;
+
+// Inter (Google Fonts) → системные fallback
+$font-family-sans-serif:
+  "Inter", "Inter Var",
+  -apple-system, BlinkMacSystemFont,
+  "SF Pro Display", "SF Pro Text",
+  "Segoe UI Variable", "Segoe UI",
+  system-ui,
+  "Helvetica Neue", Arial, sans-serif;
+
+$font-family-monospace:
+  "JetBrains Mono",
+  "SF Mono", "Cascadia Mono", "Fira Code",
+  "Lucida Console", Monaco, monospace;
+
+$font-size-base:    1rem;       // 16px
+$line-height-base:  1.65;
+
+$headings-color:        #0f172a;   // slate-900
+$headings-font-weight:  700;
+
+$code-color:        #24292e;
+$code-bg:           #f6f8fa;
+$pre-bg:            #f6f8fa;
+$pre-color:         #24292e;
+$pre-border-color:  #e1e4e8;
+
+$border-color: #e5e7eb;
+
+// Navbar
+$navbar-bg: #ffffff;
+
+/*-- scss:rules --*/
+
+// ============ ГЛОБАЛЬНЫЙ ФОН-ГРАДИЕНТ ============
+// Заметное мягкое сияние сверху, видно на любой странице
+body {
+  background:
+    radial-gradient(ellipse 90% 55% at 50% 0%,
+      rgba(13, 148, 136, 0.16) 0%,
+      rgba(13, 148, 136, 0.06) 30%,
+      transparent 65%),
+    radial-gradient(ellipse 60% 40% at 85% 5%,
+      rgba(245, 158, 11, 0.06) 0%,
+      transparent 50%),
+    #ffffff;
+  background-attachment: fixed;
+  font-feature-settings: "kern", "liga", "calt", "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-weight: 400;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+  margin-top: 1.5em;
+}
+
+h1 { color: #0f172a; font-size: 2.25rem; }
+h2 { color: #1e293b; font-size: 1.55rem; }
+h3 { color: #334155; font-size: 1.2rem; }
+h4, h5, h6 { color: #475569; }
+
+p { line-height: 1.7; }
+
+a {
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+a:hover, a:focus-visible {
+  color: $accent-dark;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+:focus-visible {
+  outline: 2px solid rgba(13, 148, 136, 0.5);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+// ============ NAVBAR ============
+.navbar {
+  background: rgba(255, 255, 255, 0.82) !important;
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid rgba(229, 231, 235, 0.6);
+  box-shadow: none;
+  padding: 0.5rem 1rem;
+}
+
+.navbar .navbar-brand,
+.navbar .navbar-title {
+  color: #0f172a !important;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  font-size: 1.1rem;
+}
+
+.navbar .nav-link,
+.navbar .navbar-nav .nav-link {
+  color: #475569 !important;
+  font-weight: 500;
+  font-size: 0.95rem;
+  padding: 0.45rem 0.9rem !important;
+  border-radius: 6px;
+  transition: color 150ms ease, background 150ms ease;
+}
+
+.navbar .nav-link:hover,
+.navbar .navbar-nav .nav-link:hover {
+  color: $accent !important;
+  background: $accent-soft;
+  font-weight: 500;
+}
+
+.navbar .nav-link.active,
+.navbar .navbar-nav .nav-link.active {
+  color: $accent !important;
+  background: $accent-soft;
+  font-weight: 600;
+}
+
+// Иконки tools-кнопок в navbar — pill-style
+.navbar .quarto-navbar-tools .quarto-navigation-tool,
+.navbar-nav .quarto-navigation-tool {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  margin: 0 0.15rem;
+  color: #6b7280 !important;
+  background: rgba(17, 24, 39, 0.04);
+  transition: background 200ms ease, color 200ms ease, transform 200ms ease;
+}
+.navbar .quarto-navbar-tools .quarto-navigation-tool:hover,
+.navbar-nav .quarto-navigation-tool:hover {
+  background: $accent !important;
+  color: #fff !important;
+  transform: translateY(-1px);
+  font-weight: normal;
+}
+
+// EN/RU текстовый переключатель — другой стиль (без круга)
+.navbar .quarto-navbar-tools a:not(.quarto-navigation-tool),
+.navbar-nav a:not(.nav-link):not(.quarto-navigation-tool) {
+  color: #6b7280;
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  padding: 0.35rem 0.7rem;
+  border-radius: 6px;
+  margin-left: 0.4rem;
+  transition: color 150ms ease, background 150ms ease;
+}
+
+// ============ ИНЛАЙН-КОД И БЛОКИ ============
+code {
+  background: $code-bg;
+  border: 1px solid $pre-border-color;
+  border-radius: 4px;
+  padding: 0.15em 0.4em;
+  color: $code-color;
+  font-size: 0.9em;
+}
+
+pre {
+  padding: 1rem 1.25rem;
+  background: $pre-bg;
+  border-radius: 6px;
+  border: 1px solid $pre-border-color;
+  overflow-x: auto;
+  font-size: 0.92em;
+}
+
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+
+blockquote {
+  border-left: 2px solid $accent;
+  margin: 1.5em 0;
+  padding: 0.4em 0 0.4em 1.2em;
+  font-style: italic;
+  color: #475569;
+}
+
+table {
+  width: auto;
+  margin: 1.4em 0;
+  border-collapse: collapse;
+}
+table th, table td {
+  text-align: left;
+  padding: 0.7em 1em;
+  border-bottom: 1px solid $border-color;
+}
+table th {
+  color: #1e293b;
+  font-weight: 600;
+  background: #f9fafb;
+}
+
+hr {
+  background: $border-color;
+  height: 1px;
+  border: 0;
+  margin: 2.5em 0;
+}
+
+img { max-width: 100%; }
+
+// ============ HERO BLOCK (главная) ============
+
+.hero-block {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 3vh 1.5rem 4vh;
+  text-align: center;
+  position: relative;
+}
+
+// Соц-иконки
+.hero-block .hero-social {
+  display: flex;
+  justify-content: center;
+  gap: 0.7rem;
+  margin: 0 0 1.5em;
+  line-height: 1;
+}
+
+.hero-block .hero-social a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(17, 24, 39, 0.04);
+  color: #475569;
+  font-size: 1.2rem;
+  text-decoration: none;
+  transition:
+    background 250ms cubic-bezier(0.16, 1, 0.3, 1),
+    color 250ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 250ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 250ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hero-block .hero-social a:hover,
+.hero-block .hero-social a:focus-visible {
+  background: $accent;
+  color: #fff;
+  font-weight: normal;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(13, 148, 136, 0.3);
+}
+
+// Фото — мягкая многослойная тень + прозрачное teal-кольцо
+.hero-block .hero-photo {
+  display: block !important;
+  width: 240px !important;
+  height: 240px !important;
+  max-width: none !important;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  object-position: center center;
+  border-radius: 50%;
+  margin: 0 auto 2.4em !important;
+  box-shadow:
+    0 0 0 6px #ffffff,
+    0 0 0 7px rgba(13, 148, 136, 0.18),
+    0 6px 16px rgba(0, 0, 0, 0.06),
+    0 20px 50px rgba(15, 23, 42, 0.12);
+}
+
+// Цитата с тонкой декоративной линией сверху
+.hero-block blockquote {
+  border: 0;
+  padding: 0;
+  margin: 0 auto 2.6em;
+  max-width: 540px;
+  text-align: center;
+  position: relative;
+}
+
+.hero-block blockquote::before {
+  content: "";
+  display: block;
+  width: 36px;
+  height: 2px;
+  background: rgba(13, 148, 136, 0.5);
+  margin: 0 auto 1.4em;
+  border-radius: 1px;
+}
+
+.hero-block blockquote p {
+  font-style: italic;
+  color: #64748b;
+  font-size: 1.02rem;
+  line-height: 1.65;
+  margin: 0 0 0.6em;
+}
+
+.hero-block blockquote p:last-child {
+  font-style: normal;
+  color: #94a3b8;
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+  margin: 0;
+}
+
+// Основной абзац hero
+.hero-block > p {
+  color: #475569;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  margin-bottom: 0;
+  letter-spacing: 0.005em;
+}
+
+.hero-block > p a {
+  color: $accent;
+  font-weight: 500;
+  border-bottom: 1px solid rgba(13, 148, 136, 0.35);
+  transition: border-color 150ms ease, color 150ms ease;
+}
+
+.hero-block > p a:hover {
+  border-bottom-color: $accent;
+  color: $accent-dark;
+  font-weight: 500;
+}
+
+// Кнопки — teal-палитра
+.hero-block .hero-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.7rem;
+}
+
+.hero-block .hero-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 120px;
+  padding: 0.7em 1.7em;
+  border: 1px solid $accent-border;
+  color: $accent !important;
+  background: $accent-soft;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.95rem;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  transition:
+    background 250ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 250ms cubic-bezier(0.16, 1, 0.3, 1),
+    color 250ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 250ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 250ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hero-block .hero-btn:hover,
+.hero-block .hero-btn:focus-visible {
+  background: $accent;
+  border-color: $accent;
+  color: #fff !important;
+  font-weight: 500;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgba(13, 148, 136, 0.32);
+}
+
+// На главной (hero) скрываем title-block
+body:has(.hero-block) #title-block-header {
+  display: none;
+}
+
+// На главной — навбар поверх градиента, прозрачный
+body:has(.hero-block) .navbar {
+  background: rgba(255, 255, 255, 0.6) !important;
+}
+
+// На главной hero уже содержит крупные кнопки Telegram/Email,
+// поэтому в навбаре их прячем — остаётся только EN-переключатель.
+// Quarto вешает на иконки класс .nav-link, поэтому таргетимся по href.
+body:has(.hero-block) .navbar .nav-link[href*="t.me/"],
+body:has(.hero-block) .navbar .nav-link[href^="mailto:"],
+body:has(.hero-block) .navbar a.quarto-navigation-tool:not(.quarto-color-scheme-toggle) {
+  display: none !important;
+}
+
+// ============ POST BYLINE (дата · чтение · категории) ============
+// JS в _quarto.yml собирает .post-byline под заголовком из mета-данных
+// Quarto, а оригинальные блоки .quarto-title-meta / .quarto-categories
+// скрывает.
+.post-byline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45em 0.7em;
+  margin: 0.4em 0 1.6em;
+  font-size: 0.88em;
+  color: #64748b;
+  font-variant-numeric: tabular-nums;
+}
+.post-byline .bl-sep {
+  opacity: 0.5;
+  user-select: none;
+  padding: 0 0.05em;
+}
+.post-byline .bl-cats {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.4em;
+}
+.post-byline .bl-cat {
+  background: rgba(13, 148, 136, 0.09);
+  color: #0d9488;
+  padding: 0.12em 0.65em;
+  border-radius: 10px;
+  font-size: 0.86em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  line-height: 1.5;
+}
+[data-bs-theme="dark"] .post-byline {
+  color: #94a3b8;
+}
+[data-bs-theme="dark"] .post-byline .bl-cat {
+  background: rgba(20, 184, 166, 0.16);
+  color: #5eead4;
+}
+
+// ============ CODE-FOLD КНОПКА ============
+details.code-fold > summary,
+details.code-fold > summary.code-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  padding: 0.4em 1em;
+  margin: 0 0 0.6em;
+  border-radius: 6px;
+  background: $accent-soft;
+  border: 1px solid $accent-border;
+  color: $accent !important;
+  font-weight: 600;
+  font-size: 0.88rem;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  transition:
+    background 180ms ease,
+    color 180ms ease,
+    border-color 180ms ease,
+    transform 180ms ease;
+}
+
+details.code-fold > summary::-webkit-details-marker {
+  display: none;
+}
+details.code-fold > summary::marker {
+  content: "";
+}
+
+details.code-fold > summary::before {
+  content: "▸";
+  font-size: 0.85em;
+  display: inline-block;
+  transition: transform 200ms ease;
+}
+
+details.code-fold[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+details.code-fold > summary:hover {
+  background: $accent;
+  border-color: $accent;
+  color: #fff !important;
+  font-weight: 600;
+  transform: translateY(-1px);
+}
+
+details.code-fold[open] > div.sourceCode,
+details.code-fold[open] > pre {
+  margin-top: 0;
+}
+
+// ============ TITLE-BLOCK НА ВНУТРЕННИХ СТРАНИЦАХ ============
+.quarto-title-block .quarto-title-banner {
+  background: transparent !important;
+  color: #0f172a !important;
+  border-bottom: 1px solid $border-color;
+}
+.quarto-title-block .title,
+.quarto-title-block .subtitle {
+  color: #0f172a !important;
+}
+.quarto-title-block .subtitle {
+  color: #64748b !important;
+  font-weight: 400;
+}
+
+// ============ FOOTER ============
+.nav-footer {
+  border-top: 1px solid $border-color;
+  color: #94a3b8;
+  font-size: 0.85em;
+  padding: 1.5em 0;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+}
+
+.nav-footer a {
+  color: #64748b;
+}
+.nav-footer a:hover {
+  color: $accent;
+}
+
+// ============ LISTING (блог / статьи) ============
+.quarto-listing .listing-default .quarto-post {
+  border-bottom: 1px solid $border-color;
+  padding: 1.4em 0.6em;
+  margin: 0 -0.6em;
+  border-radius: 6px;
+  transition: background 200ms ease, transform 200ms ease;
+}
+.quarto-listing .listing-default .quarto-post:hover {
+  background: $accent-soft;
+  transform: translateX(2px);
+}
+.quarto-listing .listing-default .quarto-post:last-child {
+  border-bottom: 0;
+}
+.quarto-listing .listing-default .listing-title {
+  color: #0f172a;
+  font-weight: 600;
+  font-size: 1.15rem;
+  margin-bottom: 0.4em;
+}
+.quarto-listing .listing-default .listing-title a {
+  color: inherit;
+}
+.quarto-listing .listing-default .listing-title a:hover {
+  color: $accent;
+  font-weight: 600;
+}
+.quarto-listing .listing-default .listing-description {
+  color: #64748b;
+  font-size: 0.95rem;
+}
+.quarto-listing .listing-default .listing-date,
+.quarto-listing .listing-default .listing-reading-time {
+  color: #94a3b8;
+  font-size: 0.82em;
+  letter-spacing: 0.02em;
+}
+.quarto-listing .listing-default .listing-categories .listing-category {
+  background: $accent-soft;
+  color: $accent-dark;
+  border-radius: 12px;
+  padding: 0.18em 0.75em;
+  font-size: 0.72em;
+  font-weight: 600;
+  border: 0;
+  opacity: 1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+// ============ MOBILE ============
+@media (max-width: 768px) {
+  .hero-block {
+    padding-top: 2vh;
+    padding-bottom: 3vh;
+  }
+  .hero-block .hero-photo {
+    width: 200px !important;
+    height: 200px !important;
+  }
+  .hero-block > p {
+    font-size: 1rem;
+  }
+  .hero-block .hero-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .hero-block .hero-btn {
+    min-width: 0;
+  }
+  h1 { font-size: 1.85rem; }
+}

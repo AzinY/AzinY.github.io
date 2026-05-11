@@ -1,0 +1,390 @@
+/*-- scss:defaults --*/
+
+// ============ ТЁМНАЯ ПАЛИТРА ============
+// Бирюзовый акцент чуть светлее (для контраста на тёмном фоне)
+
+$accent:        #14b8a6;     // teal-500 (светлее, чем #0d9488 на свету)
+$accent-dark:   #5eead4;     // teal-300 для hover
+$accent-soft:   rgba(20, 184, 166, 0.12);
+$accent-border: rgba(20, 184, 166, 0.40);
+
+$body-bg:    #0b1019;        // глубокий тёмный сине-серый
+$body-color: #cbd5e1;        // slate-300
+
+$primary:           $accent;
+$link-color:        $accent;
+$link-hover-color:  $accent-dark;
+
+$font-family-sans-serif:
+  "Inter", "Inter Var",
+  -apple-system, BlinkMacSystemFont,
+  "SF Pro Display", "SF Pro Text",
+  "Segoe UI Variable", "Segoe UI",
+  system-ui,
+  "Helvetica Neue", Arial, sans-serif;
+
+$font-family-monospace:
+  "JetBrains Mono",
+  "SF Mono", "Cascadia Mono", "Fira Code",
+  "Lucida Console", Monaco, monospace;
+
+$font-size-base:    1rem;
+$line-height-base:  1.65;
+
+$headings-color:        #f1f5f9;
+$headings-font-weight:  700;
+
+$code-color:        #e6edf3;
+$code-bg:           #161b22;
+$pre-bg:            #161b22;
+$pre-color:         #e6edf3;
+$pre-border-color:  #30363d;
+
+$border-color: #1e293b;
+
+$navbar-bg: #0b1019;
+
+/*-- scss:rules --*/
+
+// Перекрываем Bootstrap-переменные под data-bs-theme="dark" —
+// иначе darkly-defaults побеждают по специфичности селектора атрибута.
+[data-bs-theme="dark"] {
+  --bs-body-bg: #0b1019;
+  --bs-body-color: #cbd5e1;
+  --bs-primary: #14b8a6;
+  --bs-primary-rgb: 20, 184, 166;
+  --bs-link-color: #14b8a6;
+  --bs-link-color-rgb: 20, 184, 166;
+  --bs-link-hover-color: #5eead4;
+  --bs-link-hover-color-rgb: 94, 234, 212;
+  --bs-border-color: #1e293b;
+  --bs-heading-color: #f1f5f9;
+  --bs-emphasis-color: #f8fafc;
+  --bs-tertiary-bg: #161b22;
+  --bs-secondary-bg: #1e293b;
+  --bs-code-color: #e6edf3;
+  --bs-secondary-color: rgba(203, 213, 225, 0.75);
+}
+
+// Quarto вешает на body `background-color: rgba(0,0,0,0) !important`,
+// поэтому базовый цвет страницы ставим на html (его никто не трогает).
+html {
+  background-color: #0b1019;
+}
+
+body {
+  background:
+    radial-gradient(ellipse 90% 55% at 50% 0%,
+      rgba(20, 184, 166, 0.16) 0%,
+      rgba(20, 184, 166, 0.05) 30%,
+      transparent 65%),
+    radial-gradient(ellipse 60% 40% at 85% 5%,
+      rgba(245, 158, 11, 0.05) 0%,
+      transparent 50%),
+    transparent;
+  background-attachment: fixed;
+  font-feature-settings: "kern", "liga", "calt", "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-weight: 400;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+  margin-top: 1.5em;
+}
+
+h1 { color: #f8fafc; font-size: 2.25rem; }
+h2 { color: #f1f5f9; font-size: 1.55rem; }
+h3 { color: #e2e8f0; font-size: 1.2rem; }
+h4, h5, h6 { color: #cbd5e1; }
+
+p { line-height: 1.7; }
+
+a {
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+a:hover, a:focus-visible {
+  color: $accent-dark;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+:focus-visible {
+  outline: 2px solid rgba(20, 184, 166, 0.6);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+// Navbar — стеклянный тёмный
+.navbar {
+  background: rgba(11, 16, 25, 0.78) !important;
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid rgba(30, 41, 59, 0.6);
+  box-shadow: none;
+  padding: 0.5rem 1rem;
+}
+
+.navbar .navbar-brand,
+.navbar .navbar-title {
+  color: #f1f5f9 !important;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  font-size: 1.1rem;
+}
+
+.navbar .nav-link,
+.navbar .navbar-nav .nav-link {
+  color: #cbd5e1 !important;
+  font-weight: 500;
+  font-size: 0.95rem;
+  padding: 0.45rem 0.9rem !important;
+  border-radius: 6px;
+  transition: color 150ms ease, background 150ms ease;
+}
+
+.navbar .nav-link:hover,
+.navbar .navbar-nav .nav-link:hover {
+  color: $accent !important;
+  background: rgba(20, 184, 166, 0.12);
+  font-weight: 500;
+}
+
+.navbar .nav-link.active,
+.navbar .navbar-nav .nav-link.active {
+  color: $accent !important;
+  background: rgba(20, 184, 166, 0.18);
+  font-weight: 600;
+}
+
+// Code
+code {
+  background: $code-bg;
+  border: 1px solid $pre-border-color;
+  border-radius: 4px;
+  padding: 0.15em 0.4em;
+  color: $code-color;
+  font-size: 0.9em;
+}
+
+pre {
+  padding: 1rem 1.25rem;
+  background: $pre-bg;
+  border-radius: 6px;
+  border: 1px solid $pre-border-color;
+  overflow-x: auto;
+  font-size: 0.92em;
+}
+
+pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+
+blockquote {
+  border-left: 2px solid $accent;
+  margin: 1.5em 0;
+  padding: 0.4em 0 0.4em 1.2em;
+  font-style: italic;
+  color: #94a3b8;
+}
+
+table {
+  width: auto;
+  margin: 1.4em 0;
+  border-collapse: collapse;
+}
+table th, table td {
+  text-align: left;
+  padding: 0.7em 1em;
+  border-bottom: 1px solid $border-color;
+  color: #cbd5e1;
+}
+table th {
+  color: #f1f5f9;
+  font-weight: 600;
+  background: rgba(30, 41, 59, 0.5);
+}
+
+hr {
+  background: $border-color;
+  height: 1px;
+  border: 0;
+  margin: 2.5em 0;
+}
+
+// ============ HERO BLOCK ============
+.hero-block .hero-social a {
+  background: rgba(255, 255, 255, 0.06);
+  color: #cbd5e1;
+}
+
+.hero-block .hero-social a:hover,
+.hero-block .hero-social a:focus-visible {
+  background: $accent;
+  color: #0b1019;
+  font-weight: normal;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(20, 184, 166, 0.4);
+}
+
+.hero-block .hero-photo {
+  box-shadow:
+    0 0 0 6px #0b1019,
+    0 0 0 7px rgba(20, 184, 166, 0.25),
+    0 6px 16px rgba(0, 0, 0, 0.45),
+    0 20px 50px rgba(0, 0, 0, 0.55);
+}
+
+.hero-block blockquote::before {
+  background: rgba(20, 184, 166, 0.6);
+}
+
+.hero-block blockquote p {
+  color: #94a3b8;
+}
+
+.hero-block blockquote p:last-child {
+  color: #64748b;
+}
+
+.hero-block > p {
+  color: #cbd5e1;
+}
+
+.hero-block > p a {
+  color: $accent;
+  border-bottom: 1px solid rgba(20, 184, 166, 0.4);
+}
+
+.hero-block > p a:hover {
+  border-bottom-color: $accent;
+  color: $accent-dark;
+}
+
+// На главной hero уже содержит крупные кнопки Telegram/Email
+body:has(.hero-block) .navbar {
+  background: rgba(11, 16, 25, 0.55) !important;
+}
+
+body:has(.hero-block) .navbar .nav-link[href*="t.me/"],
+body:has(.hero-block) .navbar .nav-link[href^="mailto:"],
+body:has(.hero-block) .navbar a.quarto-navigation-tool:not(.quarto-color-scheme-toggle) {
+  display: none !important;
+}
+
+body:has(.hero-block) #title-block-header {
+  display: none;
+}
+
+// ============ CODE-FOLD КНОПКА (тёмная) ============
+details.code-fold > summary,
+details.code-fold > summary.code-summary {
+  background: rgba(20, 184, 166, 0.12);
+  border-color: rgba(20, 184, 166, 0.45);
+  color: $accent !important;
+}
+
+details.code-fold > summary:hover {
+  background: $accent;
+  color: #0b1019 !important;
+}
+
+// ============ TITLE-BLOCK НА ВНУТРЕННИХ СТРАНИЦАХ ============
+.quarto-title-block .quarto-title-banner {
+  background: transparent !important;
+  color: #f1f5f9 !important;
+  border-bottom: 1px solid $border-color;
+}
+.quarto-title-block .title {
+  color: #f1f5f9 !important;
+}
+.quarto-title-block .subtitle {
+  color: #94a3b8 !important;
+  font-weight: 400;
+}
+
+// ============ FOOTER ============
+.nav-footer {
+  border-top: 1px solid $border-color;
+  color: #64748b;
+  font-size: 0.85em;
+  padding: 1.5em 0;
+  background: rgba(11, 16, 25, 0.7);
+  backdrop-filter: blur(8px);
+}
+.nav-footer a { color: #94a3b8; }
+.nav-footer a:hover { color: $accent; }
+
+// ============ LISTING ============
+.quarto-listing .listing-default .quarto-post {
+  border-bottom: 1px solid $border-color;
+  padding: 1.4em 0.6em;
+  margin: 0 -0.6em;
+  border-radius: 6px;
+  transition: background 200ms ease, transform 200ms ease;
+}
+.quarto-listing .listing-default .quarto-post:hover {
+  background: rgba(20, 184, 166, 0.06);
+  transform: translateX(2px);
+}
+.quarto-listing .listing-default .quarto-post:last-child {
+  border-bottom: 0;
+}
+.quarto-listing .listing-default .listing-title {
+  color: #f1f5f9;
+  font-weight: 600;
+  font-size: 1.15rem;
+  margin-bottom: 0.4em;
+}
+.quarto-listing .listing-default .listing-title a { color: inherit; }
+.quarto-listing .listing-default .listing-title a:hover {
+  color: $accent;
+  font-weight: 600;
+}
+.quarto-listing .listing-default .listing-description {
+  color: #94a3b8;
+  font-size: 0.95rem;
+}
+.quarto-listing .listing-default .listing-date,
+.quarto-listing .listing-default .listing-reading-time {
+  color: #64748b;
+  font-size: 0.82em;
+  letter-spacing: 0.02em;
+}
+.quarto-listing .listing-default .listing-categories .listing-category {
+  background: rgba(20, 184, 166, 0.16);
+  color: $accent-dark;
+  border-radius: 12px;
+  padding: 0.18em 0.75em;
+  font-size: 0.72em;
+  font-weight: 600;
+  border: 0;
+  opacity: 1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+// Mobile
+@media (max-width: 768px) {
+  .hero-block {
+    padding-top: 2vh;
+    padding-bottom: 3vh;
+  }
+  .hero-block .hero-photo {
+    width: 200px !important;
+    height: 200px !important;
+  }
+  .hero-block > p { font-size: 1rem; }
+}
+
+// Темнее иконки переключателя темы — чтобы они были видны на тёмном фоне
+.quarto-color-scheme-toggle .bi::before {
+  filter: brightness(1.2);
+}

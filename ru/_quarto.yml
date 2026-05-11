@@ -1,0 +1,201 @@
+project:
+  type: website
+  output-dir: ../_site
+
+website:
+  title: "Юрий Азин"
+  description: "Личный сайт — Data Science и Machine Learning"
+  site-url: https://AzinYury.github.io/Zzzabardast.github.io
+  repo-url: https://github.com/AzinYury/Zzzabardast.github.io
+
+  navbar:
+    background: light
+    pinned: true
+    title: "Юрий Азин"
+    left:
+      - href: about.qmd
+        text: Обо мне
+      - href: blog.qmd
+        text: Блог
+    right:
+      - icon: telegram
+        href: https://t.me/Zzzabardast
+        aria-label: Telegram
+      - icon: envelope
+        href: mailto:y.azin@mail.ru
+        aria-label: Email
+      - text: "EN"
+        href: /en/
+
+  page-footer:
+    border: true
+    left: "© 2026 Юрий Азин"
+    right: "Сделано на [Quarto](https://quarto.org)"
+
+format:
+  html:
+    theme:
+      light:
+        - cosmo
+        - theme.scss
+      dark:
+        - darkly
+        - theme-dark.scss
+    css: styles.css
+    toc: true
+    toc-location: right
+    code-tools: true
+    code-fold: false
+    highlight-style: github
+    smooth-scroll: true
+    anchor-sections: true
+    include-in-header:
+      text: |
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+        <script>
+          // Переключатель языка через event delegation — работает даже если
+          // пользователь успевает кликнуть до DOMContentLoaded. Ведём НЕ на
+          // главную, а на эквивалентную страницу: RU → EN (префикс /en),
+          // EN → RU (без него). Позиция скролла переносится через
+          // sessionStorage и восстанавливается на новой странице.
+          function langTarget(label) {
+            var path = window.location.pathname || '/';
+            if (label === 'EN') return '/en' + (path === '/' ? '/' : path);
+            if (label === 'RU') return path.replace(/^\/en\b/, '') || '/';
+            return null;
+          }
+          // Заодно обновляем href при загрузке — чтобы корректно работали
+          // hover-подсказки и "Открыть в новой вкладке"
+          document.addEventListener('DOMContentLoaded', function () {
+            var origin = window.location.origin;
+            var s = window.location.search || '', h = window.location.hash || '';
+            document.querySelectorAll('.navbar .nav-link').forEach(function (a) {
+              var label = (a.textContent || '').trim();
+              var t = langTarget(label);
+              if (t) a.href = origin + t + s + h;
+            });
+          });
+          // В dev-окружении у нас два preview-порта (4848 = RU+EN merged,
+          // 4849 = только EN). На :4849 клик "RU" не находит файлы — поэтому
+          // принудительно ходим через :4848 (где есть оба языка).
+          function devOrigin() {
+            var origin = window.location.origin;
+            var host = window.location.hostname;
+            var port = window.location.port;
+            if ((host === '127.0.0.1' || host === 'localhost') &&
+                (port === '4848' || port === '4849')) {
+              return window.location.protocol + '//' + host + ':4848';
+            }
+            return origin;
+          }
+          // Главный обработчик — перехват клика
+          document.addEventListener('click', function (e) {
+            var a = e.target && e.target.closest && e.target.closest('.navbar a.nav-link');
+            if (!a) return;
+            var label = (a.textContent || '').trim();
+            var t = langTarget(label);
+            if (!t) return;
+            e.preventDefault();
+            e.stopPropagation();
+            try {
+              sessionStorage.setItem('lang-switch', JSON.stringify({
+                target: t, scroll: window.scrollY
+              }));
+            } catch (_) {}
+            window.location.href = devOrigin() + t +
+              (window.location.search || '') + (window.location.hash || '');
+          }, true);
+          // На новой странице — восстанавливаем скролл
+          window.addEventListener('load', function () {
+            try {
+              var raw = sessionStorage.getItem('lang-switch');
+              if (!raw) return;
+              var data = JSON.parse(raw);
+              sessionStorage.removeItem('lang-switch');
+              if (data.target === window.location.pathname) {
+                requestAnimationFrame(function () {
+                  window.scrollTo(0, data.scroll || 0);
+                });
+              }
+            } catch (_) {}
+          });
+
+          // Собираем byline-строку из мета-данных Quarto (дата, время
+          // чтения, категории) и кладём её под заголовком, между title
+          // и description. Оригинальные блоки скрываем.
+          document.addEventListener('DOMContentLoaded', function () {
+            var header = document.getElementById('title-block-header');
+            if (!header) return;
+            var titleBlock = header.querySelector('.quarto-title');
+            if (!titleBlock) return;
+            var dateEl = header.querySelector('.quarto-title-meta p.date');
+            var cats   = header.querySelectorAll('.quarto-category');
+
+            // Reading time: считаем сами по содержимому статьи
+            // (Quarto не выводит его в title-block по умолчанию)
+            function readingMinutes() {
+              var body = document.querySelector('main, #quarto-document-content, article');
+              if (!body) return null;
+              var text = (body.textContent || '').trim();
+              var words = text ? text.split(/\s+/).length : 0;
+              if (words < 50) return null;
+              return Math.max(1, Math.round(words / 200));
+            }
+
+            var parts = [];
+            if (dateEl && dateEl.textContent.trim()) {
+              parts.push('<span class="bl-date">' + dateEl.textContent.trim() + '</span>');
+            }
+            var m = readingMinutes();
+            if (m) {
+              parts.push('<span class="bl-time">' + m + ' мин чтения</span>');
+            }
+            if (cats.length) {
+              var chips = Array.prototype.map.call(cats, function (c) {
+                return '<span class="bl-cat">' + c.textContent.trim() + '</span>';
+              }).join('');
+              parts.push('<span class="bl-cats">' + chips + '</span>');
+            }
+            if (!parts.length) return;
+
+            var byline = document.createElement('div');
+            byline.className = 'post-byline';
+            byline.innerHTML = parts.join('<span class="bl-sep">·</span>');
+            titleBlock.insertAdjacentElement('afterend', byline);
+
+            var oldMeta = header.querySelector('.quarto-title-meta');
+            var oldCats = header.querySelector('.quarto-categories');
+            if (oldMeta) oldMeta.style.display = 'none';
+            if (oldCats) oldCats.style.display = 'none';
+          });
+
+          // Сохраняем позицию скролла при переключении темы. Перехватываем
+          // клик в capture-фазе, блокируем инлайн-onclick через
+          // stopImmediatePropagation и сами вызываем quartoToggleColorScheme.
+          // Скролл восстанавливаем несколько раз (rAF + setTimeout) — после
+          // того, как Quarto переколбасит стили и перерасставит элементы.
+          document.addEventListener('click', function (e) {
+            var t = e.target && e.target.closest && e.target.closest('.quarto-color-scheme-toggle');
+            if (!t) return;
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+
+            var y = window.scrollY;
+            if (typeof window.quartoToggleColorScheme === 'function') {
+              window.quartoToggleColorScheme();
+            }
+            function restore() { window.scrollTo(0, y); }
+            restore();
+            requestAnimationFrame(restore);
+            requestAnimationFrame(function () { requestAnimationFrame(restore); });
+            setTimeout(restore, 30);
+            setTimeout(restore, 100);
+            setTimeout(restore, 250);
+          }, true);
+        </script>
+
+execute:
+  freeze: auto

@@ -1,0 +1,29 @@
+---
+title: "Юрий Азин — Data Science · ML · NLP"
+title-block-style: none
+toc: false
+page-layout: full
+---
+
+::: {.hero-block}
+
+<div class="hero-social">
+  <a href="https://t.me/Zzzabardast" aria-label="Telegram" title="Telegram: @Zzzabardast"><i class="bi bi-telegram"></i></a>
+  <a href="mailto:y.azin@mail.ru" aria-label="Email" title="y.azin@mail.ru"><i class="bi bi-envelope"></i></a>
+</div>
+
+<img src="assets/profile.jpg" alt="Юрий Азин" class="hero-photo">
+
+> Гораздо ценнее приблизительный ответ на правильный вопрос,
+> чем точный — на неправильный.
+>
+> — Джон Тьюки
+
+Привет! Я DS Team Lead с многогранным опытом. Прошёл путь от
+классических алгоритмов машинного обучения до современных
+NLP-решений. Заряжаюсь от сложных задач, новых знаний
+и сильной команды вокруг. Подробнее обо мне [тут](about.qmd). Если повезёт,
+нахожу время и пишу в [блог](blog.qmd) — с кодом или без,
+иногда с опечатками. Извинити!
+
+:::

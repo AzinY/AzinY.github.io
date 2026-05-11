@@ -1,0 +1,201 @@
+project:
+  type: website
+  output-dir: ../_site/en
+
+website:
+  title: "Yury Azin"
+  description: "Personal site — Data Science and Machine Learning"
+  site-url: https://AzinYury.github.io/Zzzabardast.github.io/en
+  repo-url: https://github.com/AzinYury/Zzzabardast.github.io
+
+  navbar:
+    background: light
+    pinned: true
+    title: "Yury Azin"
+    left:
+      - href: about.qmd
+        text: About
+      - href: blog.qmd
+        text: Blog
+    right:
+      - icon: telegram
+        href: https://t.me/Zzzabardast
+        aria-label: Telegram
+      - icon: envelope
+        href: mailto:y.azin@mail.ru
+        aria-label: Email
+      - text: "RU"
+        href: /
+
+  page-footer:
+    border: true
+    left: "© 2026 Yury Azin"
+    right: "Built with [Quarto](https://quarto.org)"
+
+format:
+  html:
+    theme:
+      light:
+        - cosmo
+        - theme.scss
+      dark:
+        - darkly
+        - theme-dark.scss
+    css: styles.css
+    toc: true
+    toc-location: right
+    code-tools: true
+    code-fold: false
+    highlight-style: github
+    smooth-scroll: true
+    anchor-sections: true
+    include-in-header:
+      text: |
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+        <script>
+          // Language switcher via event delegation — works even if the user
+          // clicks before DOMContentLoaded fires. Sends the visitor to the
+          // equivalent page (RU → EN: prepend /en, EN → RU: strip it). The
+          // scroll position is carried across the navigation via sessionStorage.
+          function langTarget(label) {
+            var path = window.location.pathname || '/';
+            if (label === 'EN') return '/en' + (path === '/' ? '/' : path);
+            if (label === 'RU') return path.replace(/^\/en\b/, '') || '/';
+            return null;
+          }
+          // Also fix href on load so hover-previews and right-click menus
+          // show the correct destination
+          document.addEventListener('DOMContentLoaded', function () {
+            var origin = window.location.origin;
+            var s = window.location.search || '', h = window.location.hash || '';
+            document.querySelectorAll('.navbar .nav-link').forEach(function (a) {
+              var label = (a.textContent || '').trim();
+              var t = langTarget(label);
+              if (t) a.href = origin + t + s + h;
+            });
+          });
+          // Dev environment has two preview ports: 4848 = RU+EN merged,
+          // 4849 = EN only. Clicking "RU" on :4849 can't find RU files —
+          // so we route through :4848 (which serves both).
+          function devOrigin() {
+            var origin = window.location.origin;
+            var host = window.location.hostname;
+            var port = window.location.port;
+            if ((host === '127.0.0.1' || host === 'localhost') &&
+                (port === '4848' || port === '4849')) {
+              return window.location.protocol + '//' + host + ':4848';
+            }
+            return origin;
+          }
+          // Main handler — intercept the click
+          document.addEventListener('click', function (e) {
+            var a = e.target && e.target.closest && e.target.closest('.navbar a.nav-link');
+            if (!a) return;
+            var label = (a.textContent || '').trim();
+            var t = langTarget(label);
+            if (!t) return;
+            e.preventDefault();
+            e.stopPropagation();
+            try {
+              sessionStorage.setItem('lang-switch', JSON.stringify({
+                target: t, scroll: window.scrollY
+              }));
+            } catch (_) {}
+            window.location.href = devOrigin() + t +
+              (window.location.search || '') + (window.location.hash || '');
+          }, true);
+          // On the new page — restore the scroll position
+          window.addEventListener('load', function () {
+            try {
+              var raw = sessionStorage.getItem('lang-switch');
+              if (!raw) return;
+              var data = JSON.parse(raw);
+              sessionStorage.removeItem('lang-switch');
+              if (data.target === window.location.pathname) {
+                requestAnimationFrame(function () {
+                  window.scrollTo(0, data.scroll || 0);
+                });
+              }
+            } catch (_) {}
+          });
+
+          // Build a byline row from Quarto's metadata (date, reading
+          // time, categories) and place it under the title between the
+          // title and the description. Hide the original meta/category
+          // blocks.
+          document.addEventListener('DOMContentLoaded', function () {
+            var header = document.getElementById('title-block-header');
+            if (!header) return;
+            var titleBlock = header.querySelector('.quarto-title');
+            if (!titleBlock) return;
+            var dateEl = header.querySelector('.quarto-title-meta p.date');
+            var cats   = header.querySelectorAll('.quarto-category');
+
+            // Reading time: compute it ourselves from the article body
+            // (Quarto doesn't put it into the title-block by default)
+            function readingMinutes() {
+              var body = document.querySelector('main, #quarto-document-content, article');
+              if (!body) return null;
+              var text = (body.textContent || '').trim();
+              var words = text ? text.split(/\s+/).length : 0;
+              if (words < 50) return null;
+              return Math.max(1, Math.round(words / 200));
+            }
+
+            var parts = [];
+            if (dateEl && dateEl.textContent.trim()) {
+              parts.push('<span class="bl-date">' + dateEl.textContent.trim() + '</span>');
+            }
+            var m = readingMinutes();
+            if (m) {
+              parts.push('<span class="bl-time">' + m + ' min read</span>');
+            }
+            if (cats.length) {
+              var chips = Array.prototype.map.call(cats, function (c) {
+                return '<span class="bl-cat">' + c.textContent.trim() + '</span>';
+              }).join('');
+              parts.push('<span class="bl-cats">' + chips + '</span>');
+            }
+            if (!parts.length) return;
+
+            var byline = document.createElement('div');
+            byline.className = 'post-byline';
+            byline.innerHTML = parts.join('<span class="bl-sep">·</span>');
+            titleBlock.insertAdjacentElement('afterend', byline);
+
+            var oldMeta = header.querySelector('.quarto-title-meta');
+            var oldCats = header.querySelector('.quarto-categories');
+            if (oldMeta) oldMeta.style.display = 'none';
+            if (oldCats) oldCats.style.display = 'none';
+          });
+
+          // Preserve scroll position on theme toggle. Intercept the click
+          // in the capture phase, block Quarto's inline onclick via
+          // stopImmediatePropagation, and call quartoToggleColorScheme
+          // ourselves. Restore scroll multiple times (rAF + setTimeout)
+          // to outlast any reflows Quarto triggers.
+          document.addEventListener('click', function (e) {
+            var t = e.target && e.target.closest && e.target.closest('.quarto-color-scheme-toggle');
+            if (!t) return;
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+
+            var y = window.scrollY;
+            if (typeof window.quartoToggleColorScheme === 'function') {
+              window.quartoToggleColorScheme();
+            }
+            function restore() { window.scrollTo(0, y); }
+            restore();
+            requestAnimationFrame(restore);
+            requestAnimationFrame(function () { requestAnimationFrame(restore); });
+            setTimeout(restore, 30);
+            setTimeout(restore, 100);
+            setTimeout(restore, 250);
+          }, true);
+        </script>
+
+execute:
+  freeze: auto

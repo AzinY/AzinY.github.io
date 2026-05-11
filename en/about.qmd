@@ -1,0 +1,93 @@
+---
+title: "About"
+toc: true
+toc-depth: 2
+---
+
+## Experience
+
+### Head of DS / DE · Smart Predictive Technologies
+*Aug 2023 — Nov 2025 · R&D*
+
+- Cut infrastructure and maintenance costs by **40 %** by replacing a fleet of separate models with a single fine-tuned LLM-based solution.
+- Reduced Time-to-Market by **20 %**.
+- Managed and grew a team of 8.
+- Built ML solutions for a large product focused on comprehensive social-media analysis.
+- Implemented a RAG pipeline over 100M documents inside that product.
+- Refactored and optimized the legacy codebase.
+- Established cross-functional communication with business stakeholders.
+
+### Senior ML Engineer (NLP) · Truffle DSP
+*Sep 2021 — Apr 2023*
+
+- NLP solutions powering contextual ad targeting.
+- ML model selecting relevant advertising articles.
+- Feature engineering for other ML models.
+- Data collection and dataset generation (Scrapy, Google API).
+- Assessor service for data-quality improvement (Streamlit).
+- 130+ category classifier (BERT Multilingual, SparkNLP, Clickhouse, Airflow).
+
+### Lecturer · HSE Faculty of Computer Science
+*Sep 2023 — Apr 2024*
+
+- Seminars on "Mathematical Methods in Data Analysis" for 3rd-year students.
+- Student rating — **4.86 / 5**.
+
+### Senior ML Engineer · Rosatom
+*Aug 2019 — Sep 2020*
+
+- Text-based cost model for large construction projects.
+- Graph-based model for redesign cycle optimization.
+
+### Head of Big Data Analytics · Otkritie Bank
+*Nov 2018 — Jul 2019 · Treasury*
+
+- Option pricing model.
+- Dynamic balance model.
+- Optimal FX-transaction rate model.
+
+### Big Data Analyst · Raiffeisen Bank
+*Jan 2018 — Nov 2018 · CRM*
+
+- Anti-fraud models.
+- Customer-base clustering.
+- Text-message clustering.
+- Next-Best-Offer recommendation system.
+
+### Analyst · S7 Airlines
+*May 2012 — Aug 2013 · Analytics Department*
+
+### Tutor · Profi.ru
+*Jan 2008 — Jan 2022*
+
+- ~100 positive reviews · [Profi.ru profile](https://profi.ru/profile/AzinUA/)
+
+## Education
+
+- **Yandex School of Data Analysis** — Big Data · 2017 – 2018 · GPA 4.5 / 5 *(didn't finish — but wasn't expelled either)*
+- **Moscow State University, Faculty of Mechanics and Mathematics** — PhD program · 2014 – 2016
+- **Moscow State University, Faculty of Mechanics and Mathematics** — Specialist, Gas and liquid dynamics · 2007 – 2012 · GPA 4.75 / 5
+- **Kolmogorov School at MSU (SESC MSU)** — graduated 2007
+
+## Skills
+
+- **Programming languages:** Python, SQL
+- **Python stack:** pandas, NumPy, SciPy, matplotlib, plotly, scikit-learn, NLTK, fbprophet, Keras, transformers, sentence-transformers, LangGraph, Unsloth, Ollama
+- **MLOps / infrastructure:** MLflow, Airflow, Docker, Git
+- **Other:** Streamlit, Neo4j
+
+## Languages
+
+- Russian — native
+- English — B2
+
+## Hobbies
+
+- Hockey — playing for HC Ice Pro
+- Guitar
+
+## Contacts {#contacts}
+
+- Email: <y.azin@mail.ru>
+- Telegram: [@Zzzabardast](https://t.me/Zzzabardast)
+- City: Moscow

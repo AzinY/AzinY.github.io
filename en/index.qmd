@@ -1,0 +1,30 @@
+---
+title: "Yury Azin — Data Science · ML · NLP"
+title-block-style: none
+toc: false
+page-layout: full
+---
+
+::: {.hero-block}
+
+<div class="hero-social">
+  <a href="https://t.me/Zzzabardast" aria-label="Telegram" title="Telegram: @Zzzabardast"><i class="bi bi-telegram"></i></a>
+  <a href="mailto:y.azin@mail.ru" aria-label="Email" title="y.azin@mail.ru"><i class="bi bi-envelope"></i></a>
+</div>
+
+<img src="assets/profile.jpg" alt="Yury Azin" class="hero-photo">
+
+> Far better an approximate answer to the right question, which is
+> often vague, than an exact answer to the wrong question, which can
+> always be made precise.
+>
+> — John Tukey
+
+Hi! I'm a DS Team Lead with broad, varied experience. I've come the
+full path from classical machine-learning algorithms to modern NLP
+solutions. I'm energized by hard problems, constant learning,
+and a strong team around me. More about me [here](about.qmd). If I'm lucky
+enough to find the time, I write to the [blog](blog.qmd) — with code
+or without, sometimes with typos. Sory!
+
+:::

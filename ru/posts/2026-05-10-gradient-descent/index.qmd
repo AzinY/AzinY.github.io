@@ -1,0 +1,736 @@
+---
+title: "Градиентный спуск: на интерактивных графиках"
+date: 2025-12-22
+date-format: "DD.MM.YYYY"
+reading-time: true
+categories: [ML, optimization, python]
+description: "Набросал тут интерактивный тренажёр, наглядно демонстрирующий работу градиентного спуска в его простейшей реализации."
+toc: true
+toc-depth: 3
+jupyter: python3
+code-fold: show
+code-summary: "Показать код"
+execute:
+  echo: true
+  warning: false
+---
+
+Градиентный спуск — пожалуй, один из самых базовых кирпичиков современного
+ML. На нём держится почти всё, от линейной регрессии до миллиардных LLM.
+В этом посте не будем говорить про математику, которая стоит за алгоритмом
+(надеюсь, все уже разобрались), — лишь коротко напомню интуицию и сразу
+перейдём к самому интересному: 3D-поверхности с локальными минимумами, на
+которой видно, почему обычный GD плохо работает в невыпуклых задачах.
+
+Собственно, интуиция: представьте туриста, застигнутого грозой в горах.
+Кромешная тьма, ливень, гром — нужно срочно укрыться, и единственная
+разумная стратегия — найти место пониже, где будет хоть какое-то затишье
+от ветра. Карты нет, фонарик намок и сел, зато под ногами чувствуется
+наклон. Турист делает шаг туда, куда земля идёт вниз (длина шага — это
+$\alpha$, learning rate), снова прислушивается к наклону, снова шагает.
+И так пока вокруг не станет «всё вверх» — значит, упёрся в дно ямки. Если
+ямка одна на весь хребет — он нашёл глобальный минимум, ура. Если ямок
+несколько (а в реальной местности их обычно несколько, как в примерах
+ниже) — окажется в ближайшей. Хорошо это или плохо, зависит от
+обстоятельств.
+
+> 3D-поверхность ниже **интерактивная** — drag для вращения, scroll для
+> зума, точки на траектории кликабельны.
+
+## Невыпуклый ландшафт: 3D-демонстрация
+
+Линейная регрессия — выпуклая задача, и у её MSE один глобальный минимум.
+В реальности ландшафты сложнее: у функций бывают локальные минимумы,
+седловые точки и пологие плато, на которых обычный GD ведёт себя
+по-разному. Чтобы это пощупать, ниже — несколько классических
+benchmark-функций оптимизации. Выберите функцию в списке, задайте
+старт / шаг / число итераций и нажмите «Старт». Поверхность можно
+крутить мышкой; ползунок и кнопка ▶ помогут проиграть траекторию
+по шагам.
+
+### Что есть в выборе
+
+**Синус-косинусное произведение** *(Sin-cos product)* — наш стартовый пример:
+$$F(x,y) = \sin\!\bigl(\tfrac{1}{2}x^2 - \tfrac{1}{4}y^2 - 1\bigr)
+       \cdot \cos(2x + 1 - e^y) \cdot x$$
+Несколько локальных минимумов и седловых точек на $[-4, 4]^2$.
+
+**Химмельблау** *(Himmelblau):*
+$$F(x,y) = (x^2 + y - 11)^2 + (x + y^2 - 7)^2$$
+**Четыре одинаковых** глобальных минимума по углам. В какую яму попадёт
+GD — зависит только от стартовой точки.
+
+**Растригин** *(Rastrigin)* — классический «яичный лоток»:
+$$F(x,y) = 20 + x^2 + y^2 - 10\bigl[\cos(2\pi x) + \cos(2\pi y)\bigr]$$
+Десятки локальных минимумов на регулярной сетке шагом 1, глобальный — в центре.
+Без momentum/adaptive методов GD садится в первую же ямку.
+
+**Экли** *(Ackley):*
+$$F(x,y) = -20\, e^{-0.2\sqrt{(x^2+y^2)/2}}
+         - e^{[\cos(2\pi x) + \cos(2\pi y)]/2} + e + 20$$
+Глобальный минимум в $(0,0)$, окружённый рябью мелких ям и пологими
+склонами вдалеке. Излюбленный тест adaptive-методов.
+
+**Шестигорбый верблюд** *(Six-hump camel):*
+$$F(x,y) = \bigl(4 - 2.1x^2 + \tfrac{x^4}{3}\bigr)x^2 + xy + (-4 + 4y^2)y^2$$
+Шесть локальных, два глобальных минимума. Полностью полиномиальная — отлично
+видны переходы между бассейнами.
+
+**Бил** *(Beale)* — «банановая долина»:
+$$F(x,y) = (1.5 - x + xy)^2 + (2.25 - x + xy^2)^2 + (2.625 - x + xy^3)^2$$
+Длинный узкий каньон, по дну которого обычный GD ползёт зигзагами.
+Классический сценарий, где momentum/Adam летают намного быстрее.
+
+**Шаффер N2** *(Schaffer N2):*
+$$F(x,y) = 0.5 + \frac{\sin^2(x^2 - y^2) - 0.5}{[1 + 0.001(x^2 + y^2)]^2}$$
+Глобальный минимум в $(0,0)$. Концентрические высокочастотные осцилляции
+возле центра — GD легко садится в один из круговых локальных минимумов.
+
+**Подставка для яиц** *(Eggholder):*
+$$F(x,y) = -(y+47)\sin\!\sqrt{|y+x/2+47|} - x\sin\!\sqrt{|x-(y+47)|}$$
+Сильно хаотичный ландшафт со множеством локальных минимумов; глобальный —
+на краю области в $(512, 404.23)$. Один из самых тяжёлых benchmark'ов.
+
+**Леви N13** *(Levi N13):*
+$$F(x,y) = \sin^2(3\pi x) + (x-1)^2[1 + \sin^2(3\pi y)] + (y-1)^2[1 + \sin^2(2\pi y)]$$
+Глобальный минимум в $(1, 1)$. Регулярная сетка локальных минимумов под
+общим параболическим «огибающим».
+
+**Букин N6** *(Bukin N6):*
+$$F(x,y) = 100\sqrt{|y - 0.01x^2|} + 0.01\,|x + 10|$$
+Глобальный минимум в $(-10, 1)$. Очень узкий «гребень» параболы $y = 0.01x^2$,
+по которому метод должен двигаться — классический тест на ущельный спуск.
+
+**Розенброк** *(Rosenbrock)* — «банановая функция»:
+$$F(x,y) = (1-x)^2 + 100(y - x^2)^2$$
+Глобальный минимум в $(1, 1)$. Параболическая долина с дном $y = x^2$ —
+самый известный benchmark оптимизаторов из 1960-х.
+
+**Бут** *(Booth):*
+$$F(x,y) = (x + 2y - 7)^2 + (2x + y - 5)^2$$
+Глобальный минимум в $(1, 3)$. Простой выпуклый квадратичный пример —
+отлично подходит как «sanity check»: GD сходится за десяток шагов.
+
+> Поверхность ниже **интерактивная** — drag для вращения, scroll для зума.
+> Маркеры: 🟢 старт, 🔶 финиш траектории.
+
+```{python}
+#| code-fold: show
+#| code-summary: "Показать код (Python: дефолтная поверхность)"
+#| output: false
+import numpy as np
+import plotly.graph_objects as go
+import plotly.io as pio
+from IPython.display import HTML, display
+
+pio.templates.default = "plotly_white"
+
+
+def F_sincos(x, y):
+    return np.sin(0.5 * x**2 - 0.25 * y**2 - 1) * np.cos(2 * x + 1 - np.exp(y)) * x
+
+def grad_sincos(x, y):
+    """Аналитический градиент Sin-cos product (для начальной траектории)."""
+    u = 0.5 * x**2 - 0.25 * y**2 - 1
+    v = 2 * x + 1 - np.exp(y)
+    su, cu = np.sin(u), np.cos(u)
+    sv, cv = np.sin(v), np.cos(v)
+    return (
+        x**2 * cu * cv - 2 * x * su * sv + su * cv,
+        -0.5 * x * y * cu * cv + x * np.exp(y) * su * sv,
+    )
+
+
+def make_trajectory(F, grad_F, x0, y0, alpha=0.1, n_steps=120):
+    xs, ys, zs = [x0], [y0], [F(x0, y0) + 0.1]
+    for _ in range(n_steps):
+        gx, gy = grad_F(xs[-1], ys[-1])
+        xs.append(xs[-1] - alpha * gx)
+        ys.append(ys[-1] - alpha * gy)
+        zs.append(F(xs[-1], ys[-1]) + 0.1)
+    return xs, ys, zs
+
+
+COLORSCALE = [
+    [0.00, "#000003"],   # near-black
+    [0.12, "#1a0030"],   # very dark purple
+    [0.25, "#3e0e7a"],   # purple
+    [0.38, "#3b3a98"],   # indigo
+    [0.52, "#2563eb"],   # blue
+    [0.65, "#0ea5e9"],   # cyan-blue
+    [0.76, "#22c55e"],   # green
+    [0.85, "#facc15"],   # yellow
+    [0.93, "#f97316"],   # orange
+    [1.00, "#dc2626"],   # red
+]
+
+x_grid = np.linspace(-4, 4, 120)
+y_grid = np.linspace(-4, 4, 120)
+Xg, Yg = np.meshgrid(x_grid, y_grid)
+Zg = F_sincos(Xg, Yg)
+
+xs, ys, zs = make_trajectory(F_sincos, grad_sincos, x0=2.54, y0=-1.25,
+                             alpha=0.1, n_steps=120)
+
+fig = go.Figure([
+    # 0 — поверхность
+    go.Surface(x=Xg, y=Yg, z=Zg, colorscale=COLORSCALE, opacity=0.92,
+               showscale=False, name="F(x, y)"),
+    # 1 — линия траектории (скрыта из легенды)
+    go.Scatter3d(x=xs, y=ys, z=zs, mode="lines+markers",
+                 line=dict(color="#ef4444", width=4),
+                 marker=dict(size=3, color="#ef4444"),
+                 name="Траектория", showlegend=False),
+    # 2 — старт (зелёный круг)
+    go.Scatter3d(x=[xs[0]], y=[ys[0]], z=[zs[0]], mode="markers",
+                 marker=dict(size=8, color="#22c55e", symbol="circle",
+                             line=dict(width=2, color="white")),
+                 name="Старт"),
+    # 3 — финиш (золотой ромб)
+    go.Scatter3d(x=[xs[-1]], y=[ys[-1]], z=[zs[-1]], mode="markers",
+                 marker=dict(size=10, color="#fbbf24", symbol="diamond",
+                             line=dict(width=2, color="white")),
+                 name="Финиш"),
+])
+fig.update_layout(
+    title="Поверхность F(x, y) и траектория градиентного спуска",
+    height=620, margin=dict(l=0, r=0, t=60, b=0),
+    scene=dict(xaxis_title="x", yaxis_title="y", zaxis_title="F",
+               camera=dict(eye=dict(x=1.6, y=1.6, z=0.9))),
+)
+```
+
+```{python}
+#| echo: false
+#| output: asis
+fig_json = fig.to_json()
+display(HTML(f"""
+<style>
+.gd-funcrow {{
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.6em;
+  margin: 1em 0 0.5em;
+  padding: 0.65em 1em;
+  background: rgba(13, 148, 136, 0.05);
+  border: 1px solid rgba(13, 148, 136, 0.22);
+  border-radius: 8px;
+}}
+[data-bs-theme="dark"] .gd-funcrow {{
+  background: rgba(20, 184, 166, 0.07);
+  border-color: rgba(20, 184, 166, 0.3);
+}}
+.gd-funcrow label {{
+  font-size: 0.88em; color: inherit;
+  display: inline-flex; align-items: center; gap: 0.5em;
+  flex: 1; min-width: 0;
+}}
+.gd-funcrow select {{
+  flex: 1; min-width: 0;
+  padding: 0.4em 0.6em;
+  border: 1px solid rgba(13, 148, 136, 0.35);
+  border-radius: 5px;
+  background: transparent;
+  color: inherit;
+  font: inherit; font-size: 0.9em;
+  cursor: pointer;
+}}
+[data-bs-theme="dark"] .gd-funcrow select {{
+  border-color: rgba(20, 184, 166, 0.4);
+}}
+[data-bs-theme="dark"] .gd-funcrow select option {{
+  background: #0b1019; color: #cbd5e1;
+}}
+.gd-funcrow select:focus {{
+  outline: none;
+  border-color: #0d9488;
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.18);
+}}
+.gd-controls {{
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.8em;
+  margin: 0 0 0.4em;
+  padding: 0.7em 1em;
+  background: rgba(13, 148, 136, 0.05);
+  border: 1px solid rgba(13, 148, 136, 0.22);
+  border-radius: 8px;
+}}
+[data-bs-theme="dark"] .gd-controls {{
+  background: rgba(20, 184, 166, 0.07);
+  border-color: rgba(20, 184, 166, 0.3);
+}}
+.gd-controls label {{
+  display: inline-flex; align-items: center; gap: 0.4em;
+  font-size: 0.88em; color: inherit; user-select: none;
+}}
+.gd-controls input[type="number"] {{
+  width: 5em; padding: 0.32em 0.5em;
+  border: 1px solid rgba(13, 148, 136, 0.35);
+  border-radius: 5px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.9em;
+}}
+[data-bs-theme="dark"] .gd-controls input[type="number"] {{
+  border-color: rgba(20, 184, 166, 0.4);
+}}
+.gd-controls input[type="number"]:focus {{
+  outline: none;
+  border-color: #0d9488;
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.18);
+}}
+.gd-start-btn {{
+  margin-left: auto;
+  padding: 0.45em 1.3em;
+  border: 1px solid #0d9488;
+  border-radius: 6px;
+  background: rgba(13, 148, 136, 0.08);
+  color: #0d9488;
+  font-weight: 600; font-size: 0.92em;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: all 200ms ease;
+}}
+.gd-start-btn:hover {{
+  background: #0d9488; color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(13, 148, 136, 0.28);
+}}
+[data-bs-theme="dark"] .gd-start-btn {{
+  border-color: #14b8a6; color: #14b8a6;
+  background: rgba(20, 184, 166, 0.1);
+}}
+[data-bs-theme="dark"] .gd-start-btn:hover {{
+  background: #14b8a6; color: #0b1019;
+}}
+.gd-slider {{
+  display: flex; align-items: center; gap: 1em;
+  margin: 0.6em 0 0;
+  padding: 0.4em 0.6em;
+}}
+.gd-slider input[type="range"] {{
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  background: rgba(13, 148, 136, 0.22);
+  border-radius: 3px;
+  cursor: pointer;
+  outline: none;
+}}
+.gd-slider input[type="range"]::-webkit-slider-thumb {{
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: #0d9488;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 6px rgba(13, 148, 136, 0.45);
+  cursor: pointer;
+  transition: transform 120ms ease;
+}}
+.gd-slider input[type="range"]::-webkit-slider-thumb:hover {{ transform: scale(1.15); }}
+.gd-slider input[type="range"]::-moz-range-thumb {{
+  width: 18px; height: 18px; border-radius: 50%;
+  background: #0d9488;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 6px rgba(13, 148, 136, 0.45);
+  cursor: pointer;
+}}
+.gd-slider input[type="range"]:focus {{ outline: none; }}
+.gd-slider input[type="range"]:focus::-webkit-slider-thumb {{
+  box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.25);
+}}
+
+[data-bs-theme="dark"] .gd-slider input[type="range"] {{
+  background: rgba(94, 234, 212, 0.35);
+}}
+[data-bs-theme="dark"] .gd-slider input[type="range"]::-webkit-slider-thumb {{
+  background: #14b8a6;
+  border-color: #0b1019;
+  box-shadow: 0 2px 8px rgba(20, 184, 166, 0.6);
+}}
+[data-bs-theme="dark"] .gd-slider input[type="range"]::-moz-range-thumb {{
+  background: #14b8a6;
+  border-color: #0b1019;
+  box-shadow: 0 2px 8px rgba(20, 184, 166, 0.6);
+}}
+[data-bs-theme="dark"] .gd-slider input[type="range"]:focus::-webkit-slider-thumb {{
+  box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.35);
+}}
+.gd-step-label {{
+  font-size: 0.88em; color: inherit;
+  font-variant-numeric: tabular-nums;
+  min-width: 9em; white-space: nowrap;
+}}
+.gd-step-label .gd-step-num {{ font-weight: 700; color: #0d9488; }}
+[data-bs-theme="dark"] .gd-step-label .gd-step-num {{ color: #14b8a6; }}
+
+.gd-play-btn {{
+  flex-shrink: 0;
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgba(13, 148, 136, 0.4);
+  background: rgba(13, 148, 136, 0.1);
+  color: #0d9488;
+  font-size: 0.95em;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  transition: all 200ms ease;
+  padding: 0;
+  line-height: 1;
+}}
+.gd-play-btn:hover {{
+  background: #0d9488; color: #fff;
+  transform: scale(1.06);
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.35);
+}}
+[data-bs-theme="dark"] .gd-play-btn {{
+  border-color: rgba(20, 184, 166, 0.5);
+  background: rgba(20, 184, 166, 0.12);
+  color: #14b8a6;
+}}
+[data-bs-theme="dark"] .gd-play-btn:hover {{
+  background: #14b8a6; color: #0b1019;
+}}
+</style>
+
+<div class="gd-funcrow">
+  <label>Функция:
+    <select id="gd-func">
+      <option value="sincos" selected>Синус-косинусное произведение (Sin-cos product)</option>
+      <option value="himmelblau">Химмельблау (Himmelblau)</option>
+      <option value="rastrigin">Растригин (Rastrigin)</option>
+      <option value="ackley">Экли (Ackley)</option>
+      <option value="sixhump">Шестигорбый верблюд (Six-hump camel)</option>
+      <option value="beale">Бил (Beale)</option>
+      <option value="schaffer2">Шаффер N2 (Schaffer N2)</option>
+      <option value="eggholder">Подставка для яиц (Eggholder)</option>
+      <option value="levi">Леви N13 (Levi N13)</option>
+      <option value="bukin">Букин N6 (Bukin N6)</option>
+      <option value="rosenbrock">Розенброк (Rosenbrock)</option>
+      <option value="booth">Бут (Booth)</option>
+    </select>
+  </label>
+</div>
+
+<div class="gd-controls">
+  <label>x₀ <input type="number" id="gd-x0" value="2.54" step="0.1"></label>
+  <label>y₀ <input type="number" id="gd-y0" value="-1.25" step="0.1"></label>
+  <label>α <input type="number" id="gd-alpha" value="0.1" step="0.005" min="0.0001"></label>
+  <label>шагов <input type="number" id="gd-steps" value="120" step="10" min="10" max="500"></label>
+  <button id="gd-start" class="gd-start-btn">▶ Старт</button>
+</div>
+<div id="surface3d-plot" class="plotly-graph-div" style="height:620px; width:100%;"></div>
+<div class="gd-slider">
+  <button id="gd-play" class="gd-play-btn" title="Воспроизвести (3 шага/сек)" aria-label="Play">▶</button>
+  <input type="range" id="gd-step" min="0" max="120" value="120" step="1">
+  <span class="gd-step-label">шаг: <span class="gd-step-num" id="gd-step-cur">120</span> / <span id="gd-step-max">120</span></span>
+</div>
+
+<script>
+(function() {{
+  var figData = {fig_json};
+  var currentTraj = null;   // {{x:[], y:[], z:[]}} последней посчитанной траектории
+
+  // Все 6 функций живут в JS — переключение «на лету». Градиент —
+  // численный (central difference), один код на любую формулу.
+  var TAU = 2 * Math.PI;
+  var FUNCS = {{
+    sincos: {{
+      F: function(x,y) {{
+        return Math.sin(0.5*x*x - 0.25*y*y - 1) *
+               Math.cos(2*x + 1 - Math.exp(y)) * x;
+      }},
+      xR: [-4, 4], yR: [-4, 4],
+      x0: 2.54, y0: -1.25, alpha: 0.1, nSteps: 120
+    }},
+    himmelblau: {{
+      F: function(x,y) {{
+        var a = x*x + y - 11, b = x + y*y - 7;
+        return a*a + b*b;
+      }},
+      xR: [-5, 5], yR: [-5, 5],
+      x0: 0.5, y0: 0.5, alpha: 0.01, nSteps: 80
+    }},
+    rastrigin: {{
+      F: function(x,y) {{
+        return 20 + x*x + y*y - 10*(Math.cos(TAU*x) + Math.cos(TAU*y));
+      }},
+      xR: [-5, 5], yR: [-5, 5],
+      x0: 3.4, y0: -2.7, alpha: 0.02, nSteps: 150
+    }},
+    ackley: {{
+      F: function(x,y) {{
+        var r = Math.sqrt(0.5*(x*x + y*y));
+        var c = 0.5*(Math.cos(TAU*x) + Math.cos(TAU*y));
+        return -20*Math.exp(-0.2*r) - Math.exp(c) + Math.E + 20;
+      }},
+      xR: [-5, 5], yR: [-5, 5],
+      x0: 3.2, y0: 3.7, alpha: 0.05, nSteps: 150
+    }},
+    sixhump: {{
+      F: function(x,y) {{
+        var x2 = x*x;
+        return (4 - 2.1*x2 + x2*x2/3)*x2 + x*y + (-4 + 4*y*y)*y*y;
+      }},
+      xR: [-2, 2], yR: [-1.2, 1.2],
+      x0: 1.5, y0: 0.8, alpha: 0.02, nSteps: 120
+    }},
+    beale: {{
+      F: function(x,y) {{
+        var a = 1.5 - x + x*y;
+        var b = 2.25 - x + x*y*y;
+        var c = 2.625 - x + x*y*y*y;
+        return a*a + b*b + c*c;
+      }},
+      xR: [-4.5, 4.5], yR: [-4.5, 4.5],
+      x0: -3, y0: 2.5, alpha: 0.0005, nSteps: 200
+    }},
+    schaffer2: {{
+      F: function(x,y) {{
+        var num = Math.pow(Math.sin(x*x - y*y), 2) - 0.5;
+        var den = Math.pow(1 + 0.001*(x*x + y*y), 2);
+        return 0.5 + num / den;
+      }},
+      xR: [-30, 30], yR: [-30, 30],
+      x0: 15, y0: 20, alpha: 1.0, nSteps: 120
+    }},
+    eggholder: {{
+      F: function(x,y) {{
+        return -(y + 47) * Math.sin(Math.sqrt(Math.abs(y + x/2 + 47)))
+             - x * Math.sin(Math.sqrt(Math.abs(x - (y + 47))));
+      }},
+      xR: [-512, 512], yR: [-512, 512],
+      x0: 300, y0: -200, alpha: 5.0, nSteps: 150
+    }},
+    levi: {{
+      F: function(x,y) {{
+        var s1 = Math.sin(3*Math.PI*x);
+        var s2 = Math.sin(3*Math.PI*y);
+        var s3 = Math.sin(2*Math.PI*y);
+        return s1*s1 + (x-1)*(x-1)*(1 + s2*s2) + (y-1)*(y-1)*(1 + s3*s3);
+      }},
+      xR: [-5, 5], yR: [-5, 5],
+      x0: 3, y0: -3, alpha: 0.01, nSteps: 150
+    }},
+    bukin: {{
+      F: function(x,y) {{
+        return 100*Math.sqrt(Math.abs(y - 0.01*x*x)) + 0.01*Math.abs(x + 10);
+      }},
+      xR: [-15, -5], yR: [-3, 3],
+      x0: -7, y0: -1, alpha: 0.001, nSteps: 200
+    }},
+    rosenbrock: {{
+      F: function(x,y) {{
+        var a = 1 - x, b = y - x*x;
+        return a*a + 100*b*b;
+      }},
+      xR: [-2, 2], yR: [-1, 3],
+      x0: -1.5, y0: 1.5, alpha: 0.001, nSteps: 200
+    }},
+    booth: {{
+      F: function(x,y) {{
+        var a = x + 2*y - 7, b = 2*x + y - 5;
+        return a*a + b*b;
+      }},
+      xR: [-10, 10], yR: [-10, 10],
+      x0: -5, y0: -5, alpha: 0.03, nSteps: 80
+    }}
+  }};
+
+  function numGrad(F, x, y) {{
+    var h = 1e-4;
+    return [
+      (F(x+h, y) - F(x-h, y)) / (2*h),
+      (F(x, y+h) - F(x, y-h)) / (2*h)
+    ];
+  }}
+  function trajectory(F, x0, y0, alpha, nSteps) {{
+    var xs = [x0], ys = [y0], zs = [F(x0, y0) + 0.1];
+    for (var i = 0; i < nSteps; i++) {{
+      var g = numGrad(F, xs[xs.length-1], ys[ys.length-1]);
+      var nx = xs[xs.length-1] - alpha * g[0];
+      var ny = ys[ys.length-1] - alpha * g[1];
+      if (!isFinite(nx) || !isFinite(ny) || Math.abs(nx) > 1e6 || Math.abs(ny) > 1e6) break;
+      xs.push(nx); ys.push(ny); zs.push(F(nx, ny) + 0.1);
+    }}
+    return {{x: xs, y: ys, z: zs}};
+  }}
+  function buildSurface(F, xR, yR, n) {{
+    n = n || 80;
+    var xs = new Array(n), ys = new Array(n);
+    for (var i = 0; i < n; i++) {{
+      xs[i] = xR[0] + (xR[1] - xR[0]) * i / (n - 1);
+      ys[i] = yR[0] + (yR[1] - yR[0]) * i / (n - 1);
+    }}
+    var zs = new Array(n);
+    for (var i = 0; i < n; i++) {{
+      var row = new Array(n);
+      for (var j = 0; j < n; j++) row[j] = F(xs[j], ys[i]);
+      zs[i] = row;
+    }}
+    return {{x: xs, y: ys, z: zs}};
+  }}
+
+  function showStep(Plotly, k) {{
+    if (!currentTraj) return;
+    k = Math.max(0, Math.min(k, currentTraj.x.length - 1));
+    Plotly.restyle('surface3d-plot', {{
+      x: [currentTraj.x.slice(0, k + 1), [currentTraj.x[k]]],
+      y: [currentTraj.y.slice(0, k + 1), [currentTraj.y[k]]],
+      z: [currentTraj.z.slice(0, k + 1), [currentTraj.z[k]]]
+    }}, [1, 3]);
+    document.getElementById('gd-step-cur').textContent = k;
+  }}
+
+  function wireControls(Plotly) {{
+    var btn = document.getElementById('gd-start');
+    var slider = document.getElementById('gd-step');
+    var playBtn = document.getElementById('gd-play');
+    var funcSel = document.getElementById('gd-func');
+    if (!btn || !slider || !playBtn || !funcSel) return;
+
+    function setInputBounds(spec) {{
+      var x0i = document.getElementById('gd-x0'),
+          y0i = document.getElementById('gd-y0');
+      x0i.min = spec.xR[0]; x0i.max = spec.xR[1];
+      y0i.min = spec.yR[0]; y0i.max = spec.yR[1];
+    }}
+    setInputBounds(FUNCS[funcSel.value]);
+
+    // Сохраняем стартовую траекторию из python-данных, чтобы слайдер
+    // работал и до первого нажатия "Старт".
+    currentTraj = {{
+      x: figData.data[1].x.slice(),
+      y: figData.data[1].y.slice(),
+      z: figData.data[1].z.slice()
+    }};
+    var initLast = currentTraj.x.length - 1;
+    slider.max = initLast;
+    slider.value = initLast;
+    document.getElementById('gd-step-max').textContent = initLast;
+    document.getElementById('gd-step-cur').textContent = initLast;
+
+    // Автовоспроизведение — 3 шага/сек
+    var playInterval = null;
+    function setPlayUI(playing) {{
+      playBtn.textContent = playing ? '⏸' : '▶';
+      playBtn.title = playing ? 'Пауза' : 'Воспроизвести (3 шага/сек)';
+      playBtn.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+    }}
+    function stopPlay() {{
+      if (playInterval) {{ clearInterval(playInterval); playInterval = null; }}
+      setPlayUI(false);
+    }}
+    function startPlay() {{
+      if (playInterval) return;
+      // Если уже на финише — перемотать в начало
+      if (parseInt(slider.value, 10) >= parseInt(slider.max, 10)) {{
+        slider.value = 0; showStep(Plotly, 0);
+      }}
+      setPlayUI(true);
+      playInterval = setInterval(function() {{
+        var k = parseInt(slider.value, 10);
+        var max = parseInt(slider.max, 10);
+        if (k >= max) {{ stopPlay(); return; }}
+        slider.value = k + 1;
+        showStep(Plotly, k + 1);
+      }}, 333);
+    }}
+    playBtn.addEventListener('click', function() {{
+      if (playInterval) stopPlay(); else startPlay();
+    }});
+
+    slider.addEventListener('input', function() {{
+      stopPlay();
+      showStep(Plotly, parseInt(this.value, 10));
+    }});
+
+    function applyFunction(key) {{
+      stopPlay();
+      var spec = FUNCS[key];
+      // Заполняем контролы дефолтами выбранной функции
+      document.getElementById('gd-x0').value    = spec.x0;
+      document.getElementById('gd-y0').value    = spec.y0;
+      document.getElementById('gd-alpha').value = spec.alpha;
+      document.getElementById('gd-steps').value = spec.nSteps;
+      setInputBounds(spec);
+      // Свежие поверхность и траектория
+      var surf = buildSurface(spec.F, spec.xR, spec.yR, 80);
+      currentTraj = trajectory(spec.F, spec.x0, spec.y0, spec.alpha, spec.nSteps);
+      var last = currentTraj.x.length - 1;
+      slider.max = last; slider.value = last;
+      document.getElementById('gd-step-max').textContent = last;
+      document.getElementById('gd-step-cur').textContent = last;
+      Plotly.restyle('surface3d-plot', {{
+        x: [surf.x, currentTraj.x, [currentTraj.x[0]], [currentTraj.x[last]]],
+        y: [surf.y, currentTraj.y, [currentTraj.y[0]], [currentTraj.y[last]]],
+        z: [surf.z, currentTraj.z, [currentTraj.z[0]], [currentTraj.z[last]]]
+      }}, [0, 1, 2, 3]);
+      Plotly.relayout('surface3d-plot', {{
+        'scene.xaxis.range': spec.xR,
+        'scene.yaxis.range': spec.yR
+      }});
+    }}
+    funcSel.addEventListener('change', function() {{ applyFunction(this.value); }});
+
+    function recompute() {{
+      stopPlay();
+      var spec = FUNCS[funcSel.value];
+      var x0 = parseFloat(document.getElementById('gd-x0').value);
+      var y0 = parseFloat(document.getElementById('gd-y0').value);
+      var a  = parseFloat(document.getElementById('gd-alpha').value);
+      var n  = parseInt(document.getElementById('gd-steps').value, 10);
+      if (!isFinite(a) || a <= 0) a = spec.alpha;
+      document.getElementById('gd-alpha').value = a;
+      currentTraj = trajectory(spec.F, x0, y0, a, n);
+      var last = currentTraj.x.length - 1;
+      slider.max = last; slider.value = last;
+      document.getElementById('gd-step-max').textContent = last;
+      document.getElementById('gd-step-cur').textContent = last;
+      Plotly.restyle('surface3d-plot', {{
+        x: [currentTraj.x, [currentTraj.x[0]], [currentTraj.x[last]]],
+        y: [currentTraj.y, [currentTraj.y[0]], [currentTraj.y[last]]],
+        z: [currentTraj.z, [currentTraj.z[0]], [currentTraj.z[last]]]
+      }}, [1, 2, 3]);
+    }}
+    btn.addEventListener('click', recompute);
+  }}
+
+  function draw() {{
+    var P = window.Plotly;
+    if (!P || !P.newPlot) {{ console.error('Plotly не подгрузился'); return; }}
+    P.newPlot('surface3d-plot', figData.data, figData.layout, {{responsive: true}})
+      .then(function() {{ wireControls(P); }});
+  }}
+
+  if (window.Plotly && window.Plotly.newPlot) {{ draw(); return; }}
+
+  var savedDefine = window.define;
+  window.define = undefined;
+  var s = document.createElement('script');
+  s.src = 'https://cdn.plot.ly/plotly-2.12.1.min.js';
+  s.onload = function() {{ window.define = savedDefine; draw(); }};
+  s.onerror = function() {{ window.define = savedDefine; }};
+  document.head.appendChild(s);
+}})();
+</script>
+"""))
+```
+
+Алгоритм застрял в локальном минимуме — это типичная картина в невыпуклых
+задачах (например, в нейросетях), а также множество других неприятных
+случаев: крайне медленная сходимость, «перескакивание от стенки к стенке»
+и прочее — часть из них вы наверняка увидели своими глазами, если
+попрактиковались с функциями выше. Чтобы бороться с такими неприятностями
+придумали стохастичность, моментум, перезапуски и кучу эвристик, которые
+держат современный deep learning на плаву.
+
+## Что дальше
+
+Темы, к которым отсюда естественно подступиться:
+
+- **Adam, AdaGrad, RMSProp** — адаптивный шаг для каждой координаты.
+- **Momentum / Nesterov** — добавляем «инерцию» в правило обновления.
+- **Расписания шага в реальной жизни**: cosine, warmup, restarts.
+- **Gradient clipping** и почему он спасает обучение трансформеров.
+- **Проблема седловых точек** в высокоразмерных невыпуклых задачах.
