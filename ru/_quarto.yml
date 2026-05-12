@@ -54,6 +54,21 @@ format:
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
         <script>
+          // Одноразовая миграция: до 2026-05 дефолтом была светлая тема,
+          // и в localStorage у возвращающихся посетителей лежит явное
+          // "default". Если флаг миграции ещё не выставлен — удаляем
+          // старое значение, чтобы сработал новый темный дефолт. После
+          // этого флаг ставится и больше ничего не трогаем — пользователь
+          // может свободно переключаться, его выбор сохранится.
+          (function () {
+            try {
+              var k = 'quarto-dark-default-v1';
+              if (!localStorage.getItem(k)) {
+                localStorage.removeItem('quarto-color-scheme');
+                localStorage.setItem(k, '1');
+              }
+            } catch (_) {}
+          })();
           // Переключатель языка через event delegation — работает даже если
           // пользователь успевает кликнуть до DOMContentLoaded. Ведём НЕ на
           // главную, а на эквивалентную страницу: RU → EN (префикс /en),

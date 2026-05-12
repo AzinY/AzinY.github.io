@@ -54,6 +54,21 @@ format:
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
         <script>
+          // One-shot migration: before 2026-05 the default was the light
+          // theme, so returning visitors have an explicit "default" stored
+          // in localStorage. If our migration flag is not yet set, clear
+          // the legacy key so the new dark default applies. Then mark the
+          // flag and stop touching anything — the user's future toggles
+          // are preserved as normal.
+          (function () {
+            try {
+              var k = 'quarto-dark-default-v1';
+              if (!localStorage.getItem(k)) {
+                localStorage.removeItem('quarto-color-scheme');
+                localStorage.setItem(k, '1');
+              }
+            } catch (_) {}
+          })();
           // Language switcher via event delegation — works even if the user
           // clicks before DOMContentLoaded fires. Sends the visitor to the
           // equivalent page (RU → EN: prepend /en, EN → RU: strip it). The
