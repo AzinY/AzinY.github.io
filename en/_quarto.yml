@@ -30,21 +30,20 @@ website:
   page-footer:
     border: true
     left: "© 2026 Yury Azin"
-    right: "Built with [Quarto](https://quarto.org)"
 
 format:
   html:
     theme:
-      light:
-        - cosmo
-        - theme.scss
       dark:
         - darkly
         - theme-dark.scss
+      light:
+        - cosmo
+        - theme.scss
     css: styles.css
     toc: true
     toc-location: right
-    code-tools: true
+    code-tools: false
     code-fold: false
     highlight-style: github
     smooth-scroll: true
